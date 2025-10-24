@@ -1,0 +1,189 @@
+# SISTEMA DE CONCESIONARIA DE AUTOS
+
+# -------- CLASES PRINCIPALES --------
+class Empleado:
+    """Clase que representa un empleado genérico."""
+    def __init__(self, nombre, cargo, contacto):
+        self.nombre = nombre
+        self.cargo = cargo
+        self.contacto = contacto
+
+    def mostrar_info(self):
+        """Muestra la información del empleado."""
+        print(f"Nombre: {self.nombre} | Cargo: {self.cargo} | Contacto: {self.contacto}")
+
+
+class Mecanico:
+    """Clase que representa un mecánico."""
+    def __init__(self, empleado, especialidad):
+        self.empleado = empleado
+        self.especialidad = especialidad
+
+    def mostrar_info(self):
+        """Muestra la información del mecánico."""
+        print(f"MECÁNICO -> {self.empleado.nombre} | Especialidad: {self.especialidad}")
+
+
+class Cajero:
+    """Clase que representa un cajero"""
+    def __init__(self, empleado, caja):
+        self.empleado = empleado
+        self.caja = caja
+
+    def mostrar_info(self):
+        """Muestra la información del cajero."""
+        print(f"CAJERO -> {self.empleado.nombre} | Caja asignada: {self.caja}")
+
+
+class Auto:
+    """Clase que representa un auto registrado en la concesionaria."""
+    def __init__(self, placa, marca, modelo):
+        self.placa = placa
+        self.marca = marca
+        self.modelo = modelo
+
+    def mostrar_info(self):
+        """Muestra la información del auto."""
+        print(f"Placa: {self.placa} | Marca: {self.marca} | Modelo: {self.modelo}")
+
+
+class Servicio:
+    """Clase que representa un servicio de reparación o mantenimiento."""
+    def __init__(self, auto, tipo, maquinaria, mecanico):
+        self.auto = auto
+        self.tipo = tipo
+        self.maquinaria = maquinaria
+        self.mecanico = mecanico
+
+    def mostrar_info(self):
+        """Muestra la información del servicio realizado."""
+        print(f"Servicio: {self.tipo} | Auto: {self.auto.placa} | Maquinaria: {self.maquinaria} | Mecánico: {self.mecanico.empleado.nombre}")
+
+
+# -------- SUPERCLASE CONTROLADORA --------
+class Concesionaria:
+    """Superclase que administra toda la concesionaria."""
+    def __init__(self, nombre):
+        self.nombre = nombre
+        self.empleados = []
+        self.autos = []
+        self.servicios = []
+
+    # ----- MÉTODOS PRINCIPALES -----
+    def registrar_empleado(self):
+        print("\n--- Registrar Empleado ---")
+        nombre = input("Nombre: ")
+        cargo = input("Cargo (Mecánico/Cajero): ")
+        contacto = input("Contacto: ")
+        empleado = Empleado(nombre, cargo, contacto)
+
+        if cargo.lower() == "mecánico" or cargo.lower() == "mecanico":
+            especialidad = input("Especialidad del mecánico: ")
+            nuevo = Mecanico(empleado, especialidad)
+        else:
+            caja = input("Número de caja asignada: ")
+            nuevo = Cajero(empleado, caja)
+
+        self.empleados.append(nuevo)
+        print("Empleado registrado correctamente.")
+
+    def registrar_auto(self):
+        print("\n--- Registrar Auto ---")
+        placa = input("Placa del auto: ")
+        marca = input("Marca: ")
+        modelo = input("Modelo: ")
+        nuevo_auto = Auto(placa, marca, modelo)
+        self.autos.append(nuevo_auto)
+        print("Auto registrado correctamente.")
+
+    def registrar_servicio(self):
+        print("\n--- Registrar Servicio ---")
+        if not self.autos or not self.empleados:
+            print("Debe haber al menos un auto y un mecánico registrados.")
+            return
+
+        placa = input("Placa del auto: ")
+        auto = next((a for a in self.autos if a.placa == placa), None)
+        if not auto:
+            print("Auto no encontrado.")
+            return
+
+        print("\nSeleccione el mecánico encargado:")
+        mecanicos = [e for e in self.empleados if isinstance(e, Mecanico)]
+        for i, m in enumerate(mecanicos, 1):
+            print(f"{i}. {m.empleado.nombre} ({m.especialidad})")
+
+        if not mecanicos:
+            print("No hay mecánicos registrados.")
+            return
+
+        seleccion = int(input("Seleccione el número del mecánico: ")) - 1
+        mecanico = mecanicos[seleccion]
+
+        tipo = input("Tipo de servicio (Arreglo/Mantenimiento): ")
+        maquinaria = input("Maquinaria utilizada: ")
+
+        nuevo_servicio = Servicio(auto, tipo, maquinaria, mecanico)
+        self.servicios.append(nuevo_servicio)
+        print("Servicio registrado correctamente.")
+
+    def consultar_empleados(self):
+        print("\n--- Lista de Empleados ---")
+        if not self.empleados:
+            print("No hay empleados registrados.")
+            return
+        for emp in self.empleados:
+            emp.mostrar_info()
+
+    def consultar_autos(self):
+        print("\n--- Lista de Autos ---")
+        if not self.autos:
+            print("No hay autos registrados.")
+            return
+        for auto in self.autos:
+            auto.mostrar_info()
+
+    def consultar_servicios(self):
+        print("\n--- Lista de Servicios ---")
+        if not self.servicios:
+            print("No hay servicios registrados.")
+            return
+        for serv in self.servicios:
+            serv.mostrar_info()
+
+    # ----- MENÚ PRINCIPAL -----
+    def menu(self):
+        while True:
+            print(f"\n=== CONCESIONARIA {self.nombre.upper()} ===")
+            print("1. Registrar Empleado")
+            print("2. Registrar Auto")
+            print("3. Registrar Servicio")
+            print("4. Consultar Empleados")
+            print("5. Consultar Autos")
+            print("6. Consultar Servicios")
+            print("7. Salir")
+            opcion = input("Seleccione una opción: ")
+
+            if opcion == "1":
+                self.registrar_empleado()
+            elif opcion == "2":
+                self.registrar_auto()
+            elif opcion == "3":
+                self.registrar_servicio()
+            elif opcion == "4":
+                self.consultar_empleados()
+            elif opcion == "5":
+                self.consultar_autos()
+            elif opcion == "6":
+                self.consultar_servicios()
+            elif opcion == "7":
+                print("Saliendo del sistema...")
+                break
+            else:
+                print("Opción inválida. Intente de nuevo.")
+
+
+# -------- EJECUCIÓN PRINCIPAL --------
+if __name__ == "__main__":
+    mi_concesionaria = Concesionaria("Autos UDES")
+    mi_concesionaria.menu()
